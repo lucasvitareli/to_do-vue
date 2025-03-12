@@ -1,5 +1,8 @@
 <script setup>
-import { reactive } from 'vue';
+  import { reactive } from 'vue';
+  import MyHeader from './components/MyHeader.vue';
+  import MyForm from './components/MyForm.vue';
+  import taskList from './components/taskList.vue';
 
   const state = reactive({
     tasks: [
@@ -52,49 +55,24 @@ import { reactive } from 'vue';
     state.taskText = '';
   }
 
+  const getPendingTasksCount = () => {
+    return state.tasks.filter(task => !task.completed).length;
+  }
+
+  const toggleTaskCompletion = (task) => {
+    task.completed = !task.completed;
+  }
 
 </script>
 
 <template>
   <div class="container">
-    <header class="p-5 mb-4 mt-4 bg-light rounded-3">
-      <h1>My tasks</h1>
-      <p>
-        {{ getPendingTasks().length }} pending tasks
-      </p>
-    </header>
-    <form @submit.prevent="insertNewTask">
-      <div class="row d-flex align-items-center">
-        <div class="col">
-          <input type="text" required class="form-control" placeholder="Type here your task"
-          :value="state.taskText"
-          @change="event => state.taskText = event.target.value"/>
-        </div>
-        <div class="col-md-2">
-          <button type="submit" class="btn btn-primary">Insert</button>
-        </div>
-        <col class="md-2" >
-      </div>
-      <select class="form-control d-flex mt-4 text-center" @change="event => state.filter = event.target.value"> 
-        <option value="all">All tasks</option>
-        <option value="pending">Pending</option>
-        <option value="completed">Completed</option>
-      </select>
-    </form>
-    <ul class="list-group mt-4">
-      <li class="list-group-item" v-for="task in getFilteredTasks()">
-        <input type="checkbox" 
-        @change="event => task.completed = event.target.checked" 
-        :checked="task.completed" :id="task.title"/> 
-        <label :class="{done: task.completed }" class="ms-2" :for="task.title">
-          {{ task.title }}</label>
-      </li>
-    </ul>
+    <MyHeader :pending-tasks="getPendingTasksCount()" />
+    <MyForm :change-filter="event => state.filter = event.target.value" 
+      :temp-task="state.taskText" :edit-temp-task="event => state.taskText = event.target.value" 
+      :insert-new-task="insertNewTask"/>
+    <taskList :tasks="getFilteredTasks()" @toggle-task="toggleTaskCompletion" /> 
   </div>
 </template>
 
-<style scoped>
-  .done {
-    text-decoration: line-through;
-  }
-</style>
+
